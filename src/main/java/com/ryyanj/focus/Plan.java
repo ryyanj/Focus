@@ -34,9 +34,15 @@ public class Plan {
         long starttime = this.starttime;
 
         while(starttime < this.endtime) {
-            System.out.println("made it here");
-            System.out.println(PathFactory.get(PathEnum.PROCESSES_OUTSIDE_JAR));
-            Runtime.getRuntime().exec("osascript " + PathFactory.get(PathEnum.PROCESSES_OUTSIDE_JAR) + "browserregex.scpt " + PathFactory.get(PathEnum.PROCESSES_OUTSIDE_JAR) +  " " + this.filename);
+
+            Runtime.getRuntime().exec(
+                    "osascript " +
+                    PathFactory.get(PathEnum.PROCESSES_OUTSIDE_JAR) + "browserregex.scpt "
+                    + this.filename + " "
+                    + PathFactory.get(PathEnum.HOME_SERVICE) + " "
+                    + PathFactory.get(PathEnum.PROCESSES_OUTSIDE_JAR)
+            );
+
             Thread.sleep(5000);
             starttime = clock.instant().toEpochMilli();
         }

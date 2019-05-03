@@ -6,10 +6,10 @@ import yaml
 import subprocess
 
 
+homeservices_path = sys.argv[1]
+filename = sys.argv[2]
 
-filename = sys.argv[1]
-
-with open("/Users/rxs4498/watchservice/" + filename, 'r') as stream:
+with open(homeservices_path + filename, 'r') as stream:
     try:
         yamldata = yaml.safe_load(stream)
         appblacklist = yamldata['appblacklist']
@@ -18,4 +18,4 @@ with open("/Users/rxs4498/watchservice/" + filename, 'r') as stream:
 
 if appblacklist:
     for app in appblacklist.split():
-        subprocess.call('./processkiller.sh ' + app,shell=True)
+        subprocess.call('pkill ' + app,shell=True)

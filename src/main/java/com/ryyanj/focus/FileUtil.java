@@ -51,7 +51,6 @@ public class FileUtil {
 
         copyProcessToExternalFolder("browserregex.scpt");
         copyProcessToExternalFolder("processkiller.py");
-        copyProcessToExternalFolder("processkiller.sh");
         copyProcessToExternalFolder("tabkiller.py");
 
     }

@@ -5,10 +5,11 @@ import re
 import yaml
 
 url = sys.argv[1]
-filename = sys.argv[2]
+homeservices_path = sys.argv[2]
+filename = sys.argv[3]
 status = False
 
-with open("/Users/rxs4498/watchservice/" + filename, 'r') as stream:
+with open(homeservices_path + filename, 'r') as stream:
     try:
     	yamldata = yaml.safe_load(stream)
     	urlblacklist = yamldata['urlblacklist']
