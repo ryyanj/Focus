@@ -1,3 +1,5 @@
+package com.ryyanj.focus;
+
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
@@ -20,7 +22,7 @@ public class Task implements Callable {
     public String call() throws Exception {
         plan.execute();
         concurrentSet.remove(plan.filename);
-        FileUtils.forceDelete(new File(PathConstants.HOME_PATH + plan.filename));
+        FileUtils.forceDelete(new File(PathFactory.get(PathEnum.HOME_SERVICE) + plan.filename));
         return "task completed";
     }
 }

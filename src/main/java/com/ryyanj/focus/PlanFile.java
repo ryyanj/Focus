@@ -1,3 +1,5 @@
+package com.ryyanj.focus;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)

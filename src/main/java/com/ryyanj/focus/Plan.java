@@ -1,3 +1,5 @@
+package com.ryyanj.focus;
+
 import net.time4j.SystemClock;
 import net.time4j.TemporalType;
 
@@ -33,15 +35,16 @@ public class Plan {
 
         while(starttime < this.endtime) {
             System.out.println("made it here");
-            Runtime.getRuntime().exec("osascript " + PathConstants.PROCESS_PATH + "browserregex.scpt " + PathConstants.PROCESS_PATH + " " + this.filename);
+            System.out.println(PathFactory.get(PathEnum.PROCESSES_OUTSIDE_JAR));
+            Runtime.getRuntime().exec("osascript " + PathFactory.get(PathEnum.PROCESSES_OUTSIDE_JAR) + "browserregex.scpt " + PathFactory.get(PathEnum.PROCESSES_OUTSIDE_JAR) +  " " + this.filename);
             Thread.sleep(5000);
             starttime = clock.instant().toEpochMilli();
         }
 
     }
 
-    private void validateFileSize(String filename) {
-        if(new File(PathConstants.WATCH_PATH + filename).length() > 2000)
+    private void validateFileSize(String filename)  {
+        if(new File(PathFactory.get(PathEnum.WATCH_SERVICE) + filename).length() > 2000)
             throw new IllegalArgumentException("file too large");
     }
 

@@ -18,4 +18,4 @@ with open("/Users/rxs4498/watchservice/" + filename, 'r') as stream:
 
 if appblacklist:
     for app in appblacklist.split():
-        subprocess.call(['/Users/rxs4498/git/Focus/focusbin/processkiller.sh',app])
+        subprocess.call('./processkiller.sh ' + app,shell=True)

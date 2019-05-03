@@ -1,5 +1,8 @@
+package com.ryyanj.focus;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.nio.file.*;
@@ -15,28 +18,38 @@ public class FocusMain {
     public static void main(String[] args)  throws Exception {
 
 
+
+        //we can execute scripts inside the zip so move them to an external folder
+        //located at PathFactory.get(PathEnum.PROCESSES_OUTSIDE_JAR)
+        FileUtil.copyAllProcessesToExternalFolder();
+        deletePrcoessFolderWhenJVMTerminates();
+
         //setup watchservice to watch for file creation and changes
         WatchService watchService = FileSystems.getDefault().newWatchService();
-        Path path = Paths.get(PathConstants.WATCH_PATH);
+        Path path = Paths.get(PathFactory.get(PathEnum.WATCH_SERVICE));
         path.register(watchService, StandardWatchEventKinds.ENTRY_CREATE, StandardWatchEventKinds.ENTRY_MODIFY);
 
         //setup executor service for threads
         ExecutorService executorService = Executors.newFixedThreadPool(20);
         CompletionService<Integer> executorCompletionService= new ExecutorCompletionService<>(executorService);
 
-        //process plans that were previously running
-        File[] files = new File(PathConstants.HOME_PATH).listFiles();
+        //process and load all saved plans
+        File[] files = new File[0];
+        File file = new File(PathFactory.get(PathEnum.HOME_SERVICE));
+        if(file.exists()) {
+            files = file.listFiles();
+        }
+
         for(int i = 0; i < files.length; i++) {
 
             if(!files[i].isFile()) continue;
-
             String filename = files[i].getName();
 
             Task task;
             Plan plan;
             PlanFile planFile;
             try {
-                planFile = mapper.readValue(new File(PathConstants.HOME_PATH + filename), PlanFile.class);
+                planFile = mapper.readValue(new File(PathFactory.get(PathEnum.HOME_SERVICE)+ filename), PlanFile.class);
 
                 plan = new Plan(filename, planFile.endtime);
                 task = new Task(plan,concurrentSet);
@@ -61,7 +74,7 @@ public class FocusMain {
                 Plan plan;
                 PlanFile planFile;
                 try {
-                    planFile = mapper.readValue(new File(PathConstants.WATCH_PATH + fileName), PlanFile.class);
+                    planFile = mapper.readValue(new File(PathFactory.get(PathEnum.WATCH_SERVICE) + fileName), PlanFile.class);
                     plan = new Plan(fileName, planFile.available,planFile.duration);
                     task = new Task(plan,concurrentSet);
                     concurrentSet.add(fileName);
@@ -71,7 +84,7 @@ public class FocusMain {
                     continue;
                 }
 
-                FileUtil.replacePattern(PathConstants.WATCH_PATH + fileName, "true", "false");
+                FileUtil.replacePattern(PathFactory.get(PathEnum.WATCH_SERVICE) + fileName, "true", "false");
                 FileUtil.copyFile(fileName);
                 FileUtil.appendToFile(fileName, "\nendtime: " + plan.endtime);
 
@@ -79,6 +92,20 @@ public class FocusMain {
             key.reset();
         }
 
+
+    }
+
+
+    static void deletePrcoessFolderWhenJVMTerminates() {
+        Runtime.getRuntime().addShutdownHook(new Thread()
+        {
+            public void run()
+            {
+
+                FileUtils.deleteQuietly(new File(PathFactory.get(PathEnum.PROCESSES_OUTSIDE_JAR)));
+                System.out.println("Shutting down and deleting focusbin directory!");
+            }
+        });
     }
 
 
