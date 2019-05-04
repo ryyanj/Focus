@@ -64,6 +64,8 @@ public class FileUtil {
 
     static void copyProcessToExternalFolder(String processname) throws IOException, URISyntaxException  {
 
+
+        Logger.info("beginning to attempt to copy process + " + processname + " to external folder");
         InputStream in = FileUtil.class.getResourceAsStream("/focusbin/" + processname);
         BufferedReader reader = new BufferedReader(new InputStreamReader(in));
         File file = new File(PathFactory.get(PathEnum.PROCESSES_OUTSIDE_JAR) + processname);
@@ -83,8 +85,9 @@ public class FileUtil {
         perms.add(PosixFilePermission.OTHERS_EXECUTE);
 
 
-
+        Logger.info("beginning to attempt to change permission on process + " + processname);
         Files.setPosixFilePermissions(file.toPath(), perms);
+        Logger.info("Successfully copied process + " + processname + " to external folder");
 
 
     }
