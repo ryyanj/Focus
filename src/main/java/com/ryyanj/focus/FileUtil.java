@@ -4,6 +4,7 @@ import org.apache.commons.io.FileUtils;
 import org.pmw.tinylog.Logger;
 
 import java.io.*;
+import java.net.URISyntaxException;
 import java.nio.file.*;
 import java.nio.file.attribute.FileAttribute;
 import java.nio.file.attribute.PosixFilePermission;
@@ -16,54 +17,52 @@ import java.util.stream.Stream;
 
 public class FileUtil {
 
-    static void appendToFile(String filename, String content) {
+    static void appendToFile(String filename, String content) throws IOException, URISyntaxException {
 
-        try {
+            Logger.info("attemping to write to file + " + filename);
             Files.write(
                     Paths.get(PathFactory.get(PathEnum.HOME_SERVICE)+ filename),
                     content.getBytes(),
                     StandardOpenOption.APPEND);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+            Logger.info("done writing to file " + filename);
+
     }
 
-    static void replacePattern(String filelocation, String original, String replace) {
+    static void replacePattern(String filelocation, String original, String replace)throws IOException {
 
-        try {
+
+            Logger.info("preparing to replace text in file " + filelocation);
             Path path = Paths.get(filelocation);
             Stream<String> lines = Files.lines(path);
             List<String> replaced = lines.map(line -> line.replaceAll(original, replace)).collect(Collectors.toList());
             Files.write(path, replaced);
             lines.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+            Logger.info("succesfully replaced text in file " + filelocation);
 
     }
 
-    static void copyFile(String fileName) throws Exception {
+    static void copyFile(String fileName) throws IOException, URISyntaxException {
+
+        Logger.info("copying file " + fileName + " from " + PathFactory.get(PathEnum.WATCH_SERVICE) + " " + "to " + PathFactory.get(PathEnum.HOME_SERVICE));
         File src = new File(PathFactory.get(PathEnum.WATCH_SERVICE) + fileName);
         File dst = new File(PathFactory.get(PathEnum.HOME_SERVICE) + fileName);
         FileUtils.copyFile(src,dst);
+        Logger.info("successfully copied file to new location");
     }
 
-    static void copyAllProcessesToExternalFolder()  {
+    static void copyAllProcessesToExternalFolder() throws IOException, URISyntaxException  {
 
-        try {
+            Logger.info("beginning to attempt to copy all processes to external folder");
             copyProcessToExternalFolder("browserregex.scpt");
             copyProcessToExternalFolder("processkiller.py");
             copyProcessToExternalFolder("tabkiller.py");
-        } catch (IOException e) {
-            Logger.error(e,"problem occured copying processes to external folder");
-        } catch (Exception e) {
-            Logger.error(e, "some issue occured");
-        }
+            Logger.info("successfully copied all processes to external folder");
+
 
 
     }
 
-    static void copyProcessToExternalFolder(String processname) throws IOException  {
+    static void copyProcessToExternalFolder(String processname) throws IOException, URISyntaxException  {
 
         InputStream in = FileUtil.class.getResourceAsStream("/focusbin/" + processname);
         BufferedReader reader = new BufferedReader(new InputStreamReader(in));

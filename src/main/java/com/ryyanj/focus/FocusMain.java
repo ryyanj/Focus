@@ -1,11 +1,16 @@
 package com.ryyanj.focus;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.pmw.tinylog.Logger;
 
 import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.file.*;
 import java.util.Set;
 import java.util.concurrent.*;
@@ -16,14 +21,14 @@ public class FocusMain {
     private static final Set<String> concurrentSet = ConcurrentHashMap.newKeySet();
     private static final ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
 
-    public static void main(String[] args)  throws Exception {
+    public static void main(String[] args)  throws IOException, InterruptedException, URISyntaxException {
 
 
 
         //we can execute scripts inside the zip so move them to an external folder
         //located at PathFactory.get(PathEnum.PROCESSES_OUTSIDE_JAR)
         FileUtil.copyAllProcessesToExternalFolder();
-        Logger.info("done attempted to copy processes to external files");
+        Logger.info("done attempting to copy processes to external files");
 
         deletePrcoessFolderWhenJVMTerminates();
 
@@ -31,16 +36,19 @@ public class FocusMain {
         WatchService watchService = FileSystems.getDefault().newWatchService();
         Path path = Paths.get(PathFactory.get(PathEnum.WATCH_SERVICE));
         path.register(watchService, StandardWatchEventKinds.ENTRY_CREATE, StandardWatchEventKinds.ENTRY_MODIFY);
+        Logger.info("done setting up watchservice to watch for file changes");
 
         //setup executor service for threads
         ExecutorService executorService = Executors.newFixedThreadPool(20);
         CompletionService<Integer> executorCompletionService= new ExecutorCompletionService<>(executorService);
+        Logger.info("done setting up executorservice for thread pool");
 
         //process and load all saved plans
         File[] files = new File[0];
         File file = new File(PathFactory.get(PathEnum.HOME_SERVICE));
         if(file.exists()) {
             files = file.listFiles();
+            Logger.info("found saved plans to pick up and run");
         }
 
         for(int i = 0; i < files.length; i++) {
@@ -59,7 +67,7 @@ public class FocusMain {
                 concurrentSet.add(filename);
                 executorCompletionService.submit(task);
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.info(e, "problem picking up file");
                 continue;
             }
 
@@ -70,22 +78,30 @@ public class FocusMain {
             for (WatchEvent<?> event : key.pollEvents()) {
 
                 String fileName = event.context().toString();
+
                 //if the plan is already being run dont process it again
                 if(concurrentSet.contains(fileName)) continue;
+
+                if(isYamlFile(fileName)==false) continue;
 
                 Task task;
                 Plan plan;
                 PlanFile planFile;
+
                 try {
                     planFile = mapper.readValue(new File(PathFactory.get(PathEnum.WATCH_SERVICE) + fileName), PlanFile.class);
-                    plan = new Plan(fileName, planFile.available,planFile.duration);
-                    task = new Task(plan,concurrentSet);
-                    concurrentSet.add(fileName);
-                    executorCompletionService.submit(task);
-                } catch (Exception e) {
-                    e.printStackTrace();
+                } catch (JsonParseException | JsonMappingException e ) {
+                    Logger.info(e, "problem picking up plan cause it couldnt be parsed, continue to next plan");
                     continue;
                 }
+
+                if(planFile.available==false) continue;
+
+                plan = new Plan(fileName, planFile.available,planFile.duration);
+                task = new Task(plan,concurrentSet);
+                concurrentSet.add(fileName);
+
+                executorCompletionService.submit(task);
 
                 FileUtil.replacePattern(PathFactory.get(PathEnum.WATCH_SERVICE) + fileName, "true", "false");
                 FileUtil.copyFile(fileName);
@@ -98,6 +114,16 @@ public class FocusMain {
 
     }
 
+    private static boolean isYamlFile(String filename) {
+
+        if(FilenameUtils.getExtension(filename).equals("yml") || FilenameUtils.getExtension(filename).equals("yaml"))
+            return true;
+
+        return false;
+
+
+    }
+
 
     static void deletePrcoessFolderWhenJVMTerminates() {
         Runtime.getRuntime().addShutdownHook(new Thread()
@@ -105,8 +131,12 @@ public class FocusMain {
             public void run()
             {
 
-                FileUtils.deleteQuietly(new File(PathFactory.get(PathEnum.PROCESSES_OUTSIDE_JAR)));
-                System.out.println("Shutting down and deleting focusbin directory!");
+                try {
+                    FileUtils.deleteQuietly(new File(PathFactory.get(PathEnum.PROCESSES_OUTSIDE_JAR)));
+                } catch (URISyntaxException e) {
+                    Logger.info(e, "deleting focusbin directory");
+                }
+                Logger.info("Shutting down and deleting focusbin directory!");
             }
         });
     }

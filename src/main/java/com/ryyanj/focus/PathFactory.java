@@ -5,15 +5,11 @@ import java.net.URISyntaxException;
 
 public class PathFactory {
 
-    static String get(PathEnum pathEnum)  {
+    static String get(PathEnum pathEnum) throws URISyntaxException  {
 
         String jarpath = "";
-        try {
-             jarpath = PathFactory.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath();
 
-        } catch(Exception e) {
-            e.printStackTrace();
-        }
+        jarpath = PathFactory.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath();
 
         String jarparentpath = new File(jarpath).getParent();
 
