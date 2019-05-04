@@ -3,6 +3,7 @@ package com.ryyanj.focus;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import org.apache.commons.io.FileUtils;
+import org.pmw.tinylog.Logger;
 
 import java.io.File;
 import java.nio.file.*;
@@ -22,6 +23,8 @@ public class FocusMain {
         //we can execute scripts inside the zip so move them to an external folder
         //located at PathFactory.get(PathEnum.PROCESSES_OUTSIDE_JAR)
         FileUtil.copyAllProcessesToExternalFolder();
+        Logger.info("done attempted to copy processes to external files");
+
         deletePrcoessFolderWhenJVMTerminates();
 
         //setup watchservice to watch for file creation and changes

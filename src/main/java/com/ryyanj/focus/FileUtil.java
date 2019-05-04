@@ -1,6 +1,7 @@
 package com.ryyanj.focus;
 
 import org.apache.commons.io.FileUtils;
+import org.pmw.tinylog.Logger;
 
 import java.io.*;
 import java.nio.file.*;
@@ -47,15 +48,22 @@ public class FileUtil {
         FileUtils.copyFile(src,dst);
     }
 
-    static void copyAllProcessesToExternalFolder() throws Exception {
+    static void copyAllProcessesToExternalFolder()  {
 
-        copyProcessToExternalFolder("browserregex.scpt");
-        copyProcessToExternalFolder("processkiller.py");
-        copyProcessToExternalFolder("tabkiller.py");
+        try {
+            copyProcessToExternalFolder("browserregex.scpt");
+            copyProcessToExternalFolder("processkiller.py");
+            copyProcessToExternalFolder("tabkiller.py");
+        } catch (IOException e) {
+            Logger.error(e,"problem occured copying processes to external folder");
+        } catch (Exception e) {
+            Logger.error(e, "some issue occured");
+        }
+
 
     }
 
-    static void copyProcessToExternalFolder(String processname) throws Exception {
+    static void copyProcessToExternalFolder(String processname) throws IOException  {
 
         InputStream in = FileUtil.class.getResourceAsStream("/focusbin/" + processname);
         BufferedReader reader = new BufferedReader(new InputStreamReader(in));
@@ -66,6 +74,16 @@ public class FileUtil {
         perms.add(PosixFilePermission.OWNER_READ);
         perms.add(PosixFilePermission.OWNER_WRITE);
         perms.add(PosixFilePermission.OWNER_EXECUTE);
+
+        perms.add(PosixFilePermission.GROUP_READ);
+        perms.add(PosixFilePermission.GROUP_WRITE);
+        perms.add(PosixFilePermission.GROUP_EXECUTE);
+
+        perms.add(PosixFilePermission.OTHERS_READ);
+        perms.add(PosixFilePermission.OTHERS_WRITE);
+        perms.add(PosixFilePermission.OTHERS_EXECUTE);
+
+
 
         Files.setPosixFilePermissions(file.toPath(), perms);
 
