@@ -6,7 +6,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.pmw.tinylog.Configurator;
+import org.pmw.tinylog.Level;
 import org.pmw.tinylog.Logger;
+import org.pmw.tinylog.writers.ConsoleWriter;
+import org.pmw.tinylog.writers.FileWriter;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,7 +28,9 @@ public class FocusMain {
     public static void main(String[] args)  throws IOException, InterruptedException, URISyntaxException {
 
 
+        configureTinyLogger();
 
+        Logger.info(PathFactory.get(PathEnum.LOG_FILES)+"javalog.txt");
         //we can execute scripts inside the zip so move them to an external folder
         //located at PathFactory.get(PathEnum.PROCESSES_OUTSIDE_JAR)
         FileUtil.copyAllProcessesToExternalFolder();
@@ -99,10 +105,12 @@ public class FocusMain {
 
                 plan = new Plan(fileName, planFile.available,planFile.duration);
                 task = new Task(plan,concurrentSet);
+
                 concurrentSet.add(fileName);
 
                 executorCompletionService.submit(task);
 
+                FileUtil.replacePattern(PathFactory.get(PathEnum.WATCH_SERVICE) + fileName, "True", "false");
                 FileUtil.replacePattern(PathFactory.get(PathEnum.WATCH_SERVICE) + fileName, "true", "false");
                 FileUtil.copyFile(fileName);
                 FileUtil.appendToFile(fileName, "\nendtime: " + plan.endtime);
@@ -121,6 +129,16 @@ public class FocusMain {
 
         return false;
 
+
+    }
+
+    private static void configureTinyLogger() throws URISyntaxException {
+
+        Configurator.defaultConfig()
+                .addWriter(new ConsoleWriter())
+                .addWriter(new FileWriter(PathFactory.get(PathEnum.LOG_FILES)+"javalogs.txt"))
+                .level(Level.INFO)
+                .activate();
 
     }
 

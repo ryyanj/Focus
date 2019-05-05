@@ -4,8 +4,7 @@ import net.time4j.SystemClock;
 import net.time4j.TemporalType;
 import org.pmw.tinylog.Logger;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.net.URISyntaxException;
 import java.time.Clock;
 import java.time.Duration;
@@ -45,7 +44,14 @@ public class Plan {
                     + PathFactory.get(PathEnum.HOME_SERVICE) + " "
                     + PathFactory.get(PathEnum.PROCESSES_OUTSIDE_JAR)
             );
+
+            process.waitFor();
             Logger.info("Process exited with value " + process.exitValue());
+            if(process.exitValue()!=0) {
+                Logger.info("Process error stream is " + readProcessInputStream(process.getErrorStream()));
+                throw new RuntimeException("applescript executed with an error");
+            }
+
 
             Thread.sleep(5000);
             starttime = clock.instant().toEpochMilli();
@@ -56,6 +62,20 @@ public class Plan {
     private void validateFileSize(String filename) throws URISyntaxException {
         if(new File(PathFactory.get(PathEnum.WATCH_SERVICE) + filename).length() > 2000)
             throw new IllegalArgumentException("file too large");
+    }
+
+    private String readProcessInputStream(InputStream in) throws IOException {
+        StringBuilder sb = new StringBuilder();
+
+        BufferedReader br = new BufferedReader(new InputStreamReader(in));
+
+        String line = null;
+        while((line = br.readLine())!=null) {
+            sb.append(line);
+        }
+
+        return sb.toString();
+
     }
 
 

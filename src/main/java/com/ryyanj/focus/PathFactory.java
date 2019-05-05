@@ -23,6 +23,8 @@ public class PathFactory {
                 return jarparentpath+"/homeservice/";
             case PROCESSES_OUTSIDE_JAR:
                 return jarparentpath+"/focusbin/";
+            case LOG_FILES:
+                return jarparentpath+"/focuslogs/";
             default:
                 break;
         }

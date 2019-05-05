@@ -19,7 +19,7 @@ public class FileUtil {
 
     static void appendToFile(String filename, String content) throws IOException, URISyntaxException {
 
-            Logger.info("attemping to write to file + " + filename);
+            Logger.info("attemping to write to file " + filename);
             Files.write(
                     Paths.get(PathFactory.get(PathEnum.HOME_SERVICE)+ filename),
                     content.getBytes(),
