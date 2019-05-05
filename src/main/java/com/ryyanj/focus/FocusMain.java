@@ -27,7 +27,6 @@ public class FocusMain {
 
     public static void main(String[] args)  throws IOException, InterruptedException, URISyntaxException {
 
-
         configureTinyLogger();
 
         Logger.info(PathFactory.get(PathEnum.LOG_FILES)+"javalog.txt");

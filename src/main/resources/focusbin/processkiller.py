@@ -1,7 +1,8 @@
 #!/usr/focusbin/python
 
 import sys
-import re
+import os.path
+import logging
 import yaml
 import subprocess
 
@@ -9,6 +10,9 @@ import subprocess
 homeservices_path = sys.argv[1]
 filename = sys.argv[2]
 
+
+logging.basicConfig(filename=os.path.abspath(os.path.join(os.path.realpath(__file__), '../../focuslogs/processkiller.log')),level=logging.INFO)
+logging.info(sys.path)
 with open(homeservices_path + filename, 'r') as stream:
     try:
         yamldata = yaml.safe_load(stream)
