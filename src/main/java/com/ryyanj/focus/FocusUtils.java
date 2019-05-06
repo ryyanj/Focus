@@ -6,16 +6,14 @@ import org.pmw.tinylog.Logger;
 import java.io.*;
 import java.net.URISyntaxException;
 import java.nio.file.*;
-import java.nio.file.attribute.FileAttribute;
 import java.nio.file.attribute.PosixFilePermission;
-import java.nio.file.attribute.PosixFilePermissions;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class FileUtil {
+public class FocusUtils {
 
     static void appendToFile(String filename, String content) throws IOException, URISyntaxException {
 
@@ -66,7 +64,7 @@ public class FileUtil {
 
 
         Logger.info("beginning to attempt to copy process " + processname + " to external folder");
-        InputStream in = FileUtil.class.getResourceAsStream("/focusbin/" + processname);
+        InputStream in = FocusUtils.class.getResourceAsStream("/focusbin/" + processname);
         BufferedReader reader = new BufferedReader(new InputStreamReader(in));
         File file = new File(PathFactory.get(PathEnum.PROCESSES_OUTSIDE_JAR) + processname);
         FileUtils.copyInputStreamToFile(in, file);

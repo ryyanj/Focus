@@ -32,7 +32,7 @@ public class FocusMain {
         Logger.info(PathFactory.get(PathEnum.LOG_FILES)+"javalog.txt");
         //we can execute scripts inside the zip so move them to an external folder
         //located at PathFactory.get(PathEnum.PROCESSES_OUTSIDE_JAR)
-        FileUtil.copyAllProcessesToExternalFolder();
+        FocusUtils.copyAllProcessesToExternalFolder();
         Logger.info("done attempting to copy processes to external files");
 
         deletePrcoessFolderWhenJVMTerminates();
@@ -109,10 +109,10 @@ public class FocusMain {
 
                 executorCompletionService.submit(task);
 
-                FileUtil.replacePattern(PathFactory.get(PathEnum.WATCH_SERVICE) + fileName, "True", "false");
-                FileUtil.replacePattern(PathFactory.get(PathEnum.WATCH_SERVICE) + fileName, "true", "false");
-                FileUtil.copyFile(fileName);
-                FileUtil.appendToFile(fileName, "\nendtime: " + plan.endtime);
+                FocusUtils.replacePattern(PathFactory.get(PathEnum.WATCH_SERVICE) + fileName, "True", "false");
+                FocusUtils.replacePattern(PathFactory.get(PathEnum.WATCH_SERVICE) + fileName, "true", "false");
+                FocusUtils.copyFile(fileName);
+                FocusUtils.appendToFile(fileName, "\nendtime: " + plan.endtime);
 
             }
             key.reset();

@@ -52,7 +52,6 @@ public class Plan {
                 throw new RuntimeException("applescript executed with an error");
             }
 
-
             Thread.sleep(5000);
             starttime = clock.instant().toEpochMilli();
         }
