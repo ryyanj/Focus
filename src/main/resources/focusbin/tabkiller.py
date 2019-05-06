@@ -1,7 +1,9 @@
 #!/usr/focusbin/python
 
 import sys
+import logging
 import os.path
+sys.path.insert(0, "/Users/rxs4498/bin/focusapp/pythonlibs")
 import re
 import yaml
 
@@ -10,6 +12,8 @@ homeservices_path = sys.argv[2]
 filename = sys.argv[3]
 status = False
 
+logging.basicConfig(filename=os.path.abspath(os.path.join(os.path.realpath(__file__), '../../focuslogs/tabkiller.log')),level=logging.INFO)
+logging.info('running tabkiller app')
 with open(homeservices_path + filename, 'r') as stream:
     try:
     	yamldata = yaml.safe_load(stream)

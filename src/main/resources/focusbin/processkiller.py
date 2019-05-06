@@ -1,8 +1,9 @@
 #!/usr/focusbin/python
 
 import sys
-import os.path
 import logging
+import os.path
+sys.path.insert(0, "/Users/rxs4498/bin/focusapp/pythonlibs")
 import yaml
 import subprocess
 
@@ -12,7 +13,7 @@ filename = sys.argv[2]
 
 
 logging.basicConfig(filename=os.path.abspath(os.path.join(os.path.realpath(__file__), '../../focuslogs/processkiller.log')),level=logging.INFO)
-logging.info(sys.path)
+logging.info('running process killer app')
 with open(homeservices_path + filename, 'r') as stream:
     try:
         yamldata = yaml.safe_load(stream)
