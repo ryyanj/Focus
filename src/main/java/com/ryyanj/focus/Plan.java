@@ -2,16 +2,21 @@ package com.ryyanj.focus;
 
 import net.time4j.SystemClock;
 import net.time4j.TemporalType;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.pmw.tinylog.Logger;
+import sun.rmi.runtime.Log;
 
 import java.io.*;
 import java.net.URISyntaxException;
 import java.time.Clock;
 import java.time.Duration;
+import java.util.concurrent.TimeUnit;
 
 public class Plan {
 
     String filename;
+    String planname;
     Clock clock = TemporalType.CLOCK.from(SystemClock.MONOTONIC);
     long starttime;
     long endtime;
@@ -21,6 +26,8 @@ public class Plan {
         this.filename = filename;
         this.starttime = clock.instant().toEpochMilli();
         this.endtime = Clock.offset(clock, Duration.ofMinutes(duration)).instant().toEpochMilli();
+        this.planname = FilenameUtils.removeExtension(filename);
+
     }
 
     Plan(String filename, long endtime) throws URISyntaxException {
@@ -28,13 +35,14 @@ public class Plan {
         this.filename = filename;
         this.starttime = clock.instant().toEpochMilli();
         this.endtime = endtime;
+        this.planname = FilenameUtils.removeExtension(filename);
     }
 
     void execute() throws URISyntaxException, IOException, InterruptedException {
 
-        long starttime = this.starttime;
+        long currenttime = this.starttime;
 
-        while(starttime < this.endtime) {
+        while(currenttime < this.endtime) {
             Logger.info("getting ready to run applescript");
 
             Process process = Runtime.getRuntime().exec(
@@ -52,9 +60,30 @@ public class Plan {
                 throw new RuntimeException("applescript executed with an error");
             }
 
+
+
+            String timeleft = convertTimeLeftToHoursAndMinutes(endtime-currenttime);
+            Logger.info("time left in plan " + this.planname + " is " + timeleft);
+
+
+            String timeleftPath = PathFactory.get(PathEnum.WATCH_SERVICE) + this.planname + "_timeleft.txt";
+
+            Logger.info(planname);
+            FileUtils.writeStringToFile(new File(timeleftPath), "time left: " + timeleft, "UTF-8");
+
             Thread.sleep(5000);
-            starttime = clock.instant().toEpochMilli();
+            currenttime = clock.instant().toEpochMilli();
         }
+
+    }
+
+    private String convertTimeLeftToHoursAndMinutes(long timeleft) {
+
+        long minutesLeft = TimeUnit.MILLISECONDS.toMinutes(timeleft);
+        long hours = minutesLeft/60;
+        long minutes = minutesLeft%60;
+        String result = hours + ":" + minutes;
+        return result;
 
     }
 
