@@ -85,7 +85,7 @@ public class FocusMain {
                 String fileName = event.context().toString();
 
                 //if the plan is already being run dont process it again
-                if(concurrentSet.contains(fileName)) continue;
+                if(concurrentSet.contains(fileName) || concurrentSet.size() >= 10) continue;
 
                 if(isYamlFile(fileName)==false) continue;
 
