@@ -40,6 +40,9 @@ public class Plan {
     void execute() throws URISyntaxException, IOException, InterruptedException {
 
         long currenttime = this.starttime;
+        Logger.info("the plane name is " + planname);
+
+        String timeleftPath = "";
 
         while(currenttime < this.endtime) {
             Logger.info("getting ready to run applescript");
@@ -65,14 +68,15 @@ public class Plan {
             Logger.info("time left in plan " + this.planname + " is " + timeleft);
 
 
-            String timeleftPath = PathFactory.get(PathEnum.WATCH_SERVICE) + this.planname + "_timeleft.txt";
+            timeleftPath = PathFactory.get(PathEnum.WATCH_SERVICE) + this.planname + "_timeleft.txt";
 
-            Logger.info(planname);
             FileUtils.writeStringToFile(new File(timeleftPath), "time left: " + timeleft, "UTF-8");
 
             Thread.sleep(5000);
             currenttime = clock.instant().toEpochMilli();
         }
+
+        FileUtils.deleteQuietly(new File(timeleftPath));
 
     }
 

@@ -3,7 +3,7 @@
 import sys
 import logging
 import os.path
-sys.path.insert(0, "/Users/rxs4498/bin/focusapp/pythonlibs")
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.realpath(__file__), '../../pythonlibs')))
 import yaml
 import subprocess
 
