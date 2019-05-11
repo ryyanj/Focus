@@ -23,8 +23,8 @@ public class Plan {
     Plan(String filename, boolean available, long duration) throws URISyntaxException {
         validateFileSize(filename);
         this.filename = filename;
-        this.starttime = clock.instant().toEpochMilli();
-        this.endtime = Clock.offset(clock, Duration.ofMinutes(duration)).instant().toEpochMilli();
+        this.starttime = SystemClock.MONOTONIC.recalibrated().currentTimeInMicros();
+        this.endtime = this.starttime + TimeUnit.MINUTES.toMicros(duration);
         this.planname = FilenameUtils.removeExtension(filename);
 
     }
@@ -32,7 +32,7 @@ public class Plan {
     Plan(String filename, long endtime) throws URISyntaxException {
         validateFileSize(filename);
         this.filename = filename;
-        this.starttime = clock.instant().toEpochMilli();
+        this.starttime = SystemClock.MONOTONIC.recalibrated().currentTimeInMicros();
         this.endtime = endtime;
         this.planname = FilenameUtils.removeExtension(filename);
     }
@@ -73,7 +73,7 @@ public class Plan {
             FileUtils.writeStringToFile(new File(timeleftPath), "time left: " + timeleft, "UTF-8");
 
             Thread.sleep(5000);
-            currenttime = clock.instant().toEpochMilli();
+            currenttime = SystemClock.MONOTONIC.recalibrated().currentTimeInMicros();
         }
 
         FileUtils.deleteQuietly(new File(timeleftPath));
@@ -82,7 +82,10 @@ public class Plan {
 
     private String convertTimeLeftToHoursAndMinutes(long timeleft) {
 
-        long secondsLeft = TimeUnit.MILLISECONDS.toSeconds(timeleft);
+
+
+        //long secondsLeft = TimeUnit.MILLISECONDS.toSeconds(timeleft);
+        long secondsLeft = TimeUnit.MICROSECONDS.toSeconds(timeleft);
         long hours = secondsLeft/3600;
         secondsLeft-=3600*hours;
         long minutes = secondsLeft/60;
