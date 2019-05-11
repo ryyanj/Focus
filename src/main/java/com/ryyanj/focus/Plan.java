@@ -40,7 +40,7 @@ public class Plan {
     void execute() throws URISyntaxException, IOException, InterruptedException {
 
         long currenttime = this.starttime;
-        Logger.info("the plane name is " + planname);
+        Logger.info("the plan name is " + planname);
 
         String timeleftPath = "";
 
@@ -82,10 +82,13 @@ public class Plan {
 
     private String convertTimeLeftToHoursAndMinutes(long timeleft) {
 
-        long minutesLeft = TimeUnit.MILLISECONDS.toMinutes(timeleft);
-        long hours = minutesLeft/60;
-        long minutes = minutesLeft%60;
-        String result = hours + ":" + minutes;
+        long secondsLeft = TimeUnit.MILLISECONDS.toSeconds(timeleft);
+        long hours = secondsLeft/3600;
+        secondsLeft-=3600*hours;
+        long minutes = secondsLeft/60;
+        secondsLeft-=60*minutes;
+        long seconds = secondsLeft;
+        String result = hours + ":" + minutes + ":" + seconds;
         return result;
 
     }
