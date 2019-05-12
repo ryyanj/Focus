@@ -79,10 +79,12 @@ public class FocusMain {
         }
 
         WatchKey key;
-        Logger.info("waiting for a file to change");
+        Logger.info("waiting for a file to change in: " + Paths.get(PathFactory.get(PathEnum.WATCH_SERVICE)) );
         while ((key = watchService.take()) != null) {
             for (WatchEvent<?> event : key.pollEvents()) {
                 String fileName = event.context().toString();
+
+                Logger.info("detected change in file: " + fileName);
 
                 //if the plan is already being run dont process it again
                 if(concurrentSet.contains(fileName) || concurrentSet.size() >= 10) continue;
@@ -134,7 +136,6 @@ public class FocusMain {
     private static void configureTinyLogger() throws URISyntaxException {
 
         Configurator.defaultConfig()
-                .addWriter(new ConsoleWriter())
                 .addWriter(new FileWriter(PathFactory.get(PathEnum.LOG_FILES)+"javalogs.txt"))
                 .level(Level.INFO)
                 .activate();

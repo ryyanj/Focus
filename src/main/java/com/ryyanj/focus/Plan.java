@@ -1,38 +1,59 @@
 package com.ryyanj.focus;
 
 import net.time4j.SystemClock;
-import net.time4j.TemporalType;
+import net.time4j.clock.SntpConnector;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.pmw.tinylog.Logger;
 
 import java.io.*;
 import java.net.URISyntaxException;
-import java.time.Clock;
-import java.time.Duration;
 import java.util.concurrent.TimeUnit;
+
 
 public class Plan {
 
     String filename;
     String planname;
-    Clock clock = TemporalType.CLOCK.from(SystemClock.MONOTONIC);
+    SntpConnector con = new SntpConnector("ptbtime1.ptb.de");
     long starttime;
     long endtime;
 
-    Plan(String filename, boolean available, long duration) throws URISyntaxException {
+    Plan(String filename, boolean available, long duration) throws URISyntaxException, InterruptedException {
         validateFileSize(filename);
         this.filename = filename;
-        this.starttime = SystemClock.MONOTONIC.recalibrated().currentTimeInMicros();
+        while(true) {
+            Thread.sleep(5000);
+            try {
+                con.connect();
+                break;
+            } catch (IOException e) {
+                Logger.info("couldnt connect to time server, get on the internet");
+            }
+
+        }
+        this.starttime = SystemClock.MONOTONIC.synchronizedWith(con).currentTimeInMicros();
         this.endtime = this.starttime + TimeUnit.MINUTES.toMicros(duration);
         this.planname = FilenameUtils.removeExtension(filename);
 
     }
 
-    Plan(String filename, long endtime) throws URISyntaxException {
+    Plan(String filename, long endtime) throws URISyntaxException, InterruptedException {
+        Logger.info("running constructor used for files saved on download");
         validateFileSize(filename);
         this.filename = filename;
-        this.starttime = SystemClock.MONOTONIC.recalibrated().currentTimeInMicros();
+        while(true) {
+            Thread.sleep(5000);
+            try {
+                con.connect();
+                break;
+            } catch (IOException e) {
+                Logger.info("couldnt connect to time server, get on the internet");
+            }
+
+        }
+
+        this.starttime = SystemClock.MONOTONIC.synchronizedWith(con).currentTimeInMicros();
         this.endtime = endtime;
         this.planname = FilenameUtils.removeExtension(filename);
     }
@@ -42,7 +63,11 @@ public class Plan {
         long currenttime = this.starttime;
         Logger.info("the plan name is " + planname);
 
-        String timeleftPath = "";
+        String timeleftPath = PathFactory.get(PathEnum.WATCH_SERVICE) + this.planname + "_timeleft.txt";
+
+        if(currenttime >= this.endtime) {
+            Logger.info("current time is greater than end time so plan wont execute");
+        }
 
         while(currenttime < this.endtime) {
             Logger.info("getting ready to run applescript");
@@ -67,16 +92,17 @@ public class Plan {
             String timeleft = convertTimeLeftToHoursAndMinutes(endtime-currenttime);
             Logger.info("time left in plan " + this.planname + " is " + timeleft);
 
-
-            timeleftPath = PathFactory.get(PathEnum.WATCH_SERVICE) + this.planname + "_timeleft.txt";
-
             FileUtils.writeStringToFile(new File(timeleftPath), "time left: " + timeleft, "UTF-8");
-
             Thread.sleep(5000);
-            currenttime = SystemClock.MONOTONIC.recalibrated().currentTimeInMicros();
+            currenttime =SystemClock.MONOTONIC.synchronizedWith(con).currentTimeInMicros();
+            //currenttime = SystemClock.MONOTONIC.recalibrated().currentTimeInMicros();
         }
 
+        Logger.info("the plan is ending: " + planname);
+        Logger.info("about to delete quietly the file: " + filename + " at the location " + timeleftPath);
         FileUtils.deleteQuietly(new File(timeleftPath));
+        Logger.info(("deleted quietly: " + filename + " at the location: " + timeleftPath));
+        Logger.info("completely done with the plan " + planname);
 
     }
 
