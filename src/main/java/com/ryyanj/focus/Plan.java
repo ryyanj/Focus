@@ -96,9 +96,17 @@ public class Plan {
             FileUtils.writeStringToFile(new File(timeleftPath), "time left: " + timeleft, "UTF-8");
             Thread.sleep(5000);
             SntpConnector con = new SntpConnector("ptbtime1.ptb.de");
-            con.connect();
+            while(true) {
+                Thread.sleep(5000);
+                try {
+                    con.connect();
+                    break;
+                } catch (IOException e) {
+                    Logger.info("couldnt connect to time server, get on the internet");
+                }
+
+            }
             currenttime = SystemClock.MONOTONIC.synchronizedWith(con).currentTimeInMicros();
-            //currenttime = SystemClock.MONOTONIC.recalibrated().currentTimeInMicros();
         }
 
         Logger.info("the plan is ending: " + planname);
