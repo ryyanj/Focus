@@ -15,13 +15,13 @@ public class Plan {
 
     String filename;
     String planname;
-    SntpConnector con = new SntpConnector("ptbtime1.ptb.de");
     long starttime;
     long endtime;
 
-    Plan(String filename, boolean available, long duration) throws URISyntaxException, InterruptedException {
+    Plan(String filename, boolean available, long duration) throws URISyntaxException, InterruptedException, IOException {
         validateFileSize(filename);
         this.filename = filename;
+        SntpConnector con = new SntpConnector("ptbtime1.ptb.de");
         while(true) {
             Thread.sleep(5000);
             try {
@@ -42,6 +42,7 @@ public class Plan {
         Logger.info("running constructor used for files saved on download");
         validateFileSize(filename);
         this.filename = filename;
+        SntpConnector con = new SntpConnector("ptbtime1.ptb.de");
         while(true) {
             Thread.sleep(5000);
             try {
@@ -94,7 +95,9 @@ public class Plan {
 
             FileUtils.writeStringToFile(new File(timeleftPath), "time left: " + timeleft, "UTF-8");
             Thread.sleep(5000);
-            currenttime =SystemClock.MONOTONIC.synchronizedWith(con).currentTimeInMicros();
+            SntpConnector con = new SntpConnector("ptbtime1.ptb.de");
+            con.connect();
+            currenttime = SystemClock.MONOTONIC.synchronizedWith(con).currentTimeInMicros();
             //currenttime = SystemClock.MONOTONIC.recalibrated().currentTimeInMicros();
         }
 
@@ -106,9 +109,9 @@ public class Plan {
 
     }
 
+
+
     private String convertTimeLeftToHoursAndMinutes(long timeleft) {
-
-
 
         //long secondsLeft = TimeUnit.MILLISECONDS.toSeconds(timeleft);
         long secondsLeft = TimeUnit.MICROSECONDS.toSeconds(timeleft);
