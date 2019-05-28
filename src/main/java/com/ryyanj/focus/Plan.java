@@ -84,8 +84,7 @@ public class Plan {
             process.waitFor();
             Logger.info("Process exited with value " + process.exitValue());
             if(process.exitValue()!=0) {
-                Logger.info("Process error stream is " + readProcessInputStream(process.getErrorStream()));
-                throw new RuntimeException("applescript executed with an error");
+                Logger.error("Process error stream is " + readProcessInputStream(process.getErrorStream()));
             }
 
 
@@ -134,8 +133,12 @@ public class Plan {
     }
 
     private void validateFileSize(String filename) throws URISyntaxException {
-        if(new File(PathFactory.get(PathEnum.WATCH_SERVICE) + filename).length() > 2000)
-            throw new IllegalArgumentException("file too large");
+        File planFile = new File(PathFactory.get(PathEnum.WATCH_SERVICE) + filename);
+        long fileSize = planFile.length();
+        int limit = 25000;
+        if(fileSize > limit)
+            throw new IllegalArgumentException("file too large, size is: " + planFile.length() + "  limit is: " + limit);
+
     }
 
     private String readProcessInputStream(InputStream in) throws IOException {
