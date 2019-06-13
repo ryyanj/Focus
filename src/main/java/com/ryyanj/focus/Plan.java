@@ -18,6 +18,8 @@ public class Plan {
     long starttime;
     long endtime;
     SntpConnector con;
+    //reference link below for time servers
+    //http://support.ntp.org/bin/view/Servers/PublicTimeServer000217
     //String TIME_SERVER = "ptbtime1.ptb.de";
     String TIME_SERVER = "rustime01.rus.uni-stuttgart.de";
 
