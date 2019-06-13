@@ -98,13 +98,13 @@ public class Plan {
             Logger.info("time left in plan " + this.planname + " is " + timeleft);
 
             FileUtils.writeStringToFile(new File(timeleftPath), "time left: " + timeleft, "UTF-8");
-            Thread.sleep(300);
+            Thread.sleep(50);
             while(true) {
-                Thread.sleep(300);
                 try {
                     con.connect();
                     break;
                 } catch (IOException e) {
+                    Thread.sleep(3000);
                     Logger.info(e);
                     Logger.info("couldnt connect to time server, get on the internet");
                 }
