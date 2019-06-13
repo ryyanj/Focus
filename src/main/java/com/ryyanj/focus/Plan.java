@@ -17,13 +17,16 @@ public class Plan {
     String planname;
     long starttime;
     long endtime;
+    SntpConnector con;
+    //String TIME_SERVER = "ptbtime1.ptb.de";
+    String TIME_SERVER = "rustime01.rus.uni-stuttgart.de";
 
     Plan(String filename, boolean available, long duration) throws URISyntaxException, InterruptedException, IOException {
         validateFileSize(filename);
         this.filename = filename;
-        SntpConnector con = new SntpConnector("ptbtime1.ptb.de");
+        con = new SntpConnector(TIME_SERVER);
         while(true) {
-            Thread.sleep(5000);
+            Thread.sleep(1000);
             try {
                 con.connect();
                 break;
@@ -42,9 +45,9 @@ public class Plan {
         Logger.info("running constructor used for files saved on download");
         validateFileSize(filename);
         this.filename = filename;
-        SntpConnector con = new SntpConnector("ptbtime1.ptb.de");
+        con = new SntpConnector(TIME_SERVER);
         while(true) {
-            Thread.sleep(5000);
+            Thread.sleep(1000);
             try {
                 con.connect();
                 break;
@@ -93,14 +96,14 @@ public class Plan {
             Logger.info("time left in plan " + this.planname + " is " + timeleft);
 
             FileUtils.writeStringToFile(new File(timeleftPath), "time left: " + timeleft, "UTF-8");
-            Thread.sleep(5000);
-            SntpConnector con = new SntpConnector("ptbtime1.ptb.de");
+            Thread.sleep(300);
             while(true) {
-                Thread.sleep(5000);
+                Thread.sleep(300);
                 try {
                     con.connect();
                     break;
                 } catch (IOException e) {
+                    Logger.info(e);
                     Logger.info("couldnt connect to time server, get on the internet");
                 }
 
