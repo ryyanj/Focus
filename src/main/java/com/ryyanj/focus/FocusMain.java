@@ -86,6 +86,8 @@ public class FocusMain {
             for (WatchEvent<?> event : key.pollEvents()) {
                 String fileName = event.context().toString();
 
+                validateFileSize(fileName);
+
                 Logger.info("detected change in file: " + fileName);
 
                 //if or more plans are already running then dont allow anymore to run(DDOS prevention)
@@ -130,6 +132,15 @@ public class FocusMain {
             key.reset();
         }
 
+
+    }
+
+    private static void validateFileSize(String filename) throws URISyntaxException {
+        File planFile = new File(PathFactory.get(PathEnum.WATCH_SERVICE) + filename);
+        long fileSize = planFile.length();
+        int limit = 25000;
+        if(fileSize > limit)
+            throw new IllegalArgumentException("file too large, size is: " + planFile.length() + "  limit is: " + limit);
 
     }
 

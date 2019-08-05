@@ -24,7 +24,6 @@ public class Plan {
     String TIME_SERVER = "rustime01.rus.uni-stuttgart.de";
 
     Plan(String filename, boolean available, long duration) throws URISyntaxException, InterruptedException, IOException {
-        validateFileSize(filename);
         this.filename = filename;
         con = new SntpConnector(TIME_SERVER);
         while(true) {
@@ -45,7 +44,6 @@ public class Plan {
 
     Plan(String filename, long endtime) throws URISyntaxException, InterruptedException {
         Logger.info("running constructor used for files saved on download");
-        validateFileSize(filename);
         this.filename = filename;
         con = new SntpConnector(TIME_SERVER);
         while(true) {
@@ -134,15 +132,6 @@ public class Plan {
         long seconds = secondsLeft;
         String result = hours + ":" + minutes + ":" + seconds;
         return result;
-
-    }
-
-    private void validateFileSize(String filename) throws URISyntaxException {
-        File planFile = new File(PathFactory.get(PathEnum.WATCH_SERVICE) + filename);
-        long fileSize = planFile.length();
-        int limit = 25000;
-        if(fileSize > limit)
-            throw new IllegalArgumentException("file too large, size is: " + planFile.length() + "  limit is: " + limit);
 
     }
 
