@@ -16,8 +16,10 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.*;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.*;
+import java.util.stream.Collectors;
 
 
 public class FocusMain {
@@ -28,9 +30,9 @@ public class FocusMain {
     public static void main(String[] args)  throws IOException, InterruptedException, URISyntaxException {
 
         configureTinyLogger();
-
         Logger.info(PathFactory.get(PathEnum.LOG_FILES)+"javalog.txt");
-        //we can execute scripts inside the zip so move them to an external folder
+
+        //we cant execute scripts inside the zip so move them to an external folder
         //located at PathFactory.get(PathEnum.PROCESSES_OUTSIDE_JAR)
         FocusUtils.copyAllProcessesToExternalFolder();
         Logger.info("done attempting to copy processes to external files");
@@ -86,9 +88,10 @@ public class FocusMain {
 
                 Logger.info("detected change in file: " + fileName);
 
-                //if the plan is already being run dont process it again
-                if(concurrentSet.contains(fileName) || concurrentSet.size() >= 10) continue;
+                //if or more plans are already running then dont allow anymore to run(DDOS prevention)
+                if(concurrentSet.size() >= 10) continue;
 
+                //if its not a yaml file ignore it
                 if(isYamlFile(fileName)==false) continue;
 
                 Task task;
@@ -102,7 +105,14 @@ public class FocusMain {
                     continue;
                 }
 
+                //if the plan is not active dont run it
                 if(planFile.available==false) continue;
+
+                //if the plan is already running then add any new blacklist items
+                if(concurrentSet.contains(fileName)) {
+                    updateBlackList(fileName);
+                    continue;
+                }
 
                 plan = new Plan(fileName, planFile.available,planFile.duration);
                 task = new Task(plan,concurrentSet);
@@ -140,6 +150,29 @@ public class FocusMain {
                 .level(Level.INFO)
                 .activate();
 
+    }
+
+    private static void updateBlackList(String filename) {
+        try {
+
+            //load the file in home service into an object
+            PlanFile homeServicePlanFile = mapper.readValue(new File(PathFactory.get(PathEnum.HOME_SERVICE) + filename), PlanFile.class);
+
+            //load the file in watch service into an object
+            PlanFile watchServicePlanFile = mapper.readValue(new File(PathFactory.get(PathEnum.WATCH_SERVICE) + filename), PlanFile.class);
+
+            //update homserviceplanfile with new blacklist urls
+            Set<String> homeServicePlanSet = new HashSet<>();
+            homeServicePlanSet.addAll(homeServicePlanFile.getUrlblacklist());
+            homeServicePlanSet.addAll(watchServicePlanFile.getUrlblacklist());
+            homeServicePlanFile.setUrlblacklist(homeServicePlanSet.stream().collect(Collectors.toList()));
+
+            //write the modified object back to home service
+            mapper.writeValue(new File(PathFactory.get(PathEnum.HOME_SERVICE) + filename), homeServicePlanFile);
+
+        } catch (Exception e) {
+            Logger.info(e, "had an error updating blacklisty");
+        }
     }
 
 

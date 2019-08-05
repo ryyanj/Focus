@@ -22,5 +22,5 @@ with open(homeservices_path + filename, 'r') as stream:
         print(exc)
 
 if appblacklist:
-    for app in appblacklist.split():
+    for app in appblacklist:
         subprocess.call('pkill ' + app,shell=True)

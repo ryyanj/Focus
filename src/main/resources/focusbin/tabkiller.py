@@ -23,13 +23,13 @@ with open(homeservices_path + filename, 'r') as stream:
         print(exc)
 
 if urlblacklist:
-	for regex in urlblacklist.split():
+	for regex in urlblacklist:
 		if re.search(regex,url):
 			status = True
 			break
 
 if urlwhitelist:
-	for regex in urlwhitelist.split():
+	for regex in urlwhitelist:
 		if re.search(regex,url):
 			status = False
 			break
