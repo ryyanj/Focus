@@ -18,6 +18,7 @@ import java.net.URISyntaxException;
 import java.nio.file.*;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
@@ -75,7 +76,7 @@ public class FocusMain {
                 concurrentSet.add(filename);
                 executorCompletionService.submit(task);
             } catch (Exception e) {
-                Logger.info(e, "problem picking up file");
+                Logger.error(e, "problem picking up file");
                 continue;
             }
 
@@ -104,7 +105,7 @@ public class FocusMain {
                 try {
                     planFile = mapper.readValue(new File(PathFactory.get(PathEnum.WATCH_SERVICE) + fileName), PlanFile.class);
                 } catch (JsonParseException | JsonMappingException e ) {
-                    Logger.info(e, "problem picking up plan cause it couldnt be parsed, continue to next plan");
+                    Logger.error(e, "problem picking up plan cause it couldnt be parsed, continue to next plan");
                     continue;
                 }
 
@@ -174,22 +175,39 @@ public class FocusMain {
             PlanFile watchServicePlanFile = mapper.readValue(new File(PathFactory.get(PathEnum.WATCH_SERVICE) + filename), PlanFile.class);
 
             //update homserviceplanfile with new blacklist urls
+            List<String> homeServicePlanUrlblacklist = new ArrayList<>();
+            if(homeServicePlanFile.getUrlblacklist()!=null)
+                homeServicePlanUrlblacklist = homeServicePlanFile.getUrlblacklist();
+            List<String> watchServicePlanUrlblacklist = new ArrayList<>();
+            if(watchServicePlanFile.getUrlblacklist()!=null)
+                watchServicePlanUrlblacklist = watchServicePlanFile.getUrlblacklist();
+
+
             Set<String> homeServiceUrlPlanSet = new HashSet<>();
-            homeServiceUrlPlanSet.addAll(homeServicePlanFile.getUrlblacklist());
-            homeServiceUrlPlanSet.addAll(watchServicePlanFile.getUrlblacklist());
+            homeServiceUrlPlanSet.addAll(homeServicePlanUrlblacklist);
+            homeServiceUrlPlanSet.addAll(watchServicePlanUrlblacklist);
             homeServicePlanFile.setUrlblacklist(new ArrayList<>(homeServiceUrlPlanSet));
 
             //update homserviceplanfile with new blacklist apps
+            List<String> homeServicePlanAppblacklist = new ArrayList<>();
+            if(homeServicePlanFile.getAppblacklist()!=null)
+                homeServicePlanAppblacklist = homeServicePlanFile.getAppblacklist();
+
+            List<String> watchServicePlanAppblacklist = new ArrayList<>();
+            if(watchServicePlanFile.getAppblacklist()!=null)
+                watchServicePlanAppblacklist = watchServicePlanFile.getAppblacklist();
+
+
             Set<String> homeServiceAppPlanSet = new HashSet<>();
-            homeServiceAppPlanSet.addAll(homeServicePlanFile.getAppblacklist());
-            homeServiceAppPlanSet.addAll(watchServicePlanFile.getAppblacklist());
+            homeServiceAppPlanSet.addAll(homeServicePlanAppblacklist);
+            homeServiceAppPlanSet.addAll(watchServicePlanAppblacklist);
             homeServicePlanFile.setAppblacklist(new ArrayList<>(homeServiceAppPlanSet));
 
             //write the modified object back to home service
             mapper.writeValue(new File(PathFactory.get(PathEnum.HOME_SERVICE) + filename), homeServicePlanFile);
 
         } catch (Exception e) {
-            Logger.info(e, "had an error updating url blacklist");
+            Logger.error(e, "had an error updating url blacklist");
         }
     }
 
@@ -202,7 +220,7 @@ public class FocusMain {
                 try {
                     FileUtils.deleteQuietly(new File(PathFactory.get(PathEnum.PROCESSES_OUTSIDE_JAR)));
                 } catch (URISyntaxException e) {
-                    Logger.info(e, "deleting focusbin directory");
+                    Logger.error(e, "deleting focusbin directory");
                 }
                 Logger.info("Shutting down and deleting focusbin directory!");
             }

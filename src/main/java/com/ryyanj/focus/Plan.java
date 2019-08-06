@@ -32,7 +32,7 @@ public class Plan {
                 con.connect();
                 break;
             } catch (IOException e) {
-                Logger.info("couldnt connect to time server, get on the internet");
+                Logger.error("couldnt connect to time server, get on the internet");
             }
 
         }
@@ -52,7 +52,7 @@ public class Plan {
                 con.connect();
                 break;
             } catch (IOException e) {
-                Logger.info("couldnt connect to time server, get on the internet");
+                Logger.error("couldnt connect to time server, get on the internet");
             }
 
         }
@@ -103,8 +103,8 @@ public class Plan {
                     break;
                 } catch (IOException e) {
                     Thread.sleep(3000);
-                    Logger.info(e);
-                    Logger.info("couldnt connect to time server, get on the internet");
+                    Logger.error(e);
+                    Logger.error("couldnt connect to time server, get on the internet");
                 }
 
             }
