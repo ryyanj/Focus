@@ -16,6 +16,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.*;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.*;
@@ -176,13 +177,13 @@ public class FocusMain {
             Set<String> homeServiceUrlPlanSet = new HashSet<>();
             homeServiceUrlPlanSet.addAll(homeServicePlanFile.getUrlblacklist());
             homeServiceUrlPlanSet.addAll(watchServicePlanFile.getUrlblacklist());
-            homeServicePlanFile.setUrlblacklist(homeServiceUrlPlanSet.stream().collect(Collectors.toList()));
+            homeServicePlanFile.setUrlblacklist(new ArrayList<>(homeServiceUrlPlanSet));
 
             //update homserviceplanfile with new blacklist apps
             Set<String> homeServiceAppPlanSet = new HashSet<>();
             homeServiceAppPlanSet.addAll(homeServicePlanFile.getAppblacklist());
             homeServiceAppPlanSet.addAll(watchServicePlanFile.getAppblacklist());
-            homeServicePlanFile.setAppblacklist(homeServiceAppPlanSet.stream().collect(Collectors.toList()));
+            homeServicePlanFile.setAppblacklist(new ArrayList<>(homeServiceAppPlanSet));
 
             //write the modified object back to home service
             mapper.writeValue(new File(PathFactory.get(PathEnum.HOME_SERVICE) + filename), homeServicePlanFile);
