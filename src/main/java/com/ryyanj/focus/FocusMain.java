@@ -173,19 +173,24 @@ public class FocusMain {
             PlanFile watchServicePlanFile = mapper.readValue(new File(PathFactory.get(PathEnum.WATCH_SERVICE) + filename), PlanFile.class);
 
             //update homserviceplanfile with new blacklist urls
-            Set<String> homeServicePlanSet = new HashSet<>();
-            homeServicePlanSet.addAll(homeServicePlanFile.getUrlblacklist());
-            homeServicePlanSet.addAll(watchServicePlanFile.getUrlblacklist());
-            homeServicePlanFile.setUrlblacklist(homeServicePlanSet.stream().collect(Collectors.toList()));
+            Set<String> homeServiceUrlPlanSet = new HashSet<>();
+            homeServiceUrlPlanSet.addAll(homeServicePlanFile.getUrlblacklist());
+            homeServiceUrlPlanSet.addAll(watchServicePlanFile.getUrlblacklist());
+            homeServicePlanFile.setUrlblacklist(homeServiceUrlPlanSet.stream().collect(Collectors.toList()));
+
+            //update homserviceplanfile with new blacklist apps
+            Set<String> homeServiceAppPlanSet = new HashSet<>();
+            homeServiceAppPlanSet.addAll(homeServicePlanFile.getAppblacklist());
+            homeServiceAppPlanSet.addAll(watchServicePlanFile.getAppblacklist());
+            homeServicePlanFile.setAppblacklist(homeServiceAppPlanSet.stream().collect(Collectors.toList()));
 
             //write the modified object back to home service
             mapper.writeValue(new File(PathFactory.get(PathEnum.HOME_SERVICE) + filename), homeServicePlanFile);
 
         } catch (Exception e) {
-            Logger.info(e, "had an error updating blacklisty");
+            Logger.info(e, "had an error updating url blacklist");
         }
     }
-
 
     static void deletePrcoessFolderWhenJVMTerminates() {
         Runtime.getRuntime().addShutdownHook(new Thread()
