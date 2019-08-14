@@ -88,7 +88,7 @@ public class FocusMain {
             for (WatchEvent<?> event : key.pollEvents()) {
                 String fileName = event.context().toString();
 
-                validateFileSize(fileName);
+                if(isFileSizeTooLarge(fileName)) continue;
 
                 Logger.info("detected change in file: " + fileName);
 
@@ -137,13 +137,15 @@ public class FocusMain {
 
     }
 
-    private static void validateFileSize(String filename) throws URISyntaxException {
+    private static boolean isFileSizeTooLarge(String filename) throws URISyntaxException {
         File planFile = new File(PathFactory.get(PathEnum.WATCH_SERVICE) + filename);
         long fileSize = planFile.length();
         int limit = 25000;
-        if(fileSize > limit)
-            throw new IllegalArgumentException("file too large, size is: " + planFile.length() + "  limit is: " + limit);
-
+        if(fileSize > limit) {
+            Logger.error("file too large, size is: " + planFile.length() + "  limit is: " + limit);
+            return true;
+        }
+        return false;
     }
 
     private static boolean isYamlFile(String filename) {
